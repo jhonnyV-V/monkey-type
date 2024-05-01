@@ -28,6 +28,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.LPAREN:   CALL,
 }
 
 type Parser struct {
@@ -70,6 +71,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.NextToken()
 	return p
@@ -122,20 +124,22 @@ func (p *Parser) ParseLetStatement() *ast.LetStatement {
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
 	}
-	//TODO: We're skipping the expression until we found a semicolon
-	for !p.currentTokenIs(token.SEMICOLON) {
+	p.NextToken()
+	ls.Value = p.parseExpression(LOWEST)
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.NextToken()
 	}
 	return ls
 }
 
 func (p *Parser) ParseReturnStatement() *ast.ReturnStatement {
-	ls := &ast.ReturnStatement{Token: p.currentToken}
-	//TODO: We're skipping the expression until we found a semicolon
-	for !p.currentTokenIs(token.SEMICOLON) {
+	statement := &ast.ReturnStatement{Token: p.currentToken}
+	p.NextToken()
+	statement.ReturnValue = p.parseExpression(LOWEST)
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.NextToken()
 	}
-	return ls
+	return statement
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
@@ -335,6 +339,33 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 
 	literal.Body = p.parseBlockStatement()
 	return literal
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	arguments := []ast.Expression{}
+	if p.peekTokenIs(token.RPAREN) {
+		p.NextToken()
+		return arguments
+	}
+	p.NextToken()
+	arguments = append(arguments, p.parseExpression(LOWEST))
+	for p.peekTokenIs(token.COMMA) && !p.peekTokenIs(token.EOF) {
+		p.NextToken()
+		p.NextToken()
+		arguments = append(arguments, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return arguments
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	expression := &ast.CallExpression{Token: p.currentToken, Function: function}
+	expression.Arguments = p.parseCallArguments()
+	return expression
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
