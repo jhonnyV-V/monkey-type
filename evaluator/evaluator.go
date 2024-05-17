@@ -78,6 +78,8 @@ func Eval(node ast.Node, env *object.Enviroment) object.Object {
 		}
 
 		return applyFunction(function, args)
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	}
 	return nil
 }
@@ -158,6 +160,8 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
 	case operator == "==":
@@ -239,6 +243,10 @@ func evalIdentifier(node *ast.Identifier, env *object.Enviroment) object.Object 
 	if ok {
 		return val
 	}
+
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
 	return newError("identifier not found: " + node.Value)
 }
 
@@ -255,15 +263,19 @@ func evalExpressions(expressions []ast.Expression, env *object.Enviroment) []obj
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
 
-	if !ok {
+	case *object.Builtin:
+		return fn.Fn(args...)
+
+	default:
 		return newError("not a function: %s", fn.Type())
-	}
 
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
+	}
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviroment {
@@ -279,4 +291,13 @@ func unwrapReturnValue(obj object.Object) object.Object {
 		return returnValue.Value
 	}
 	return obj
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	return &object.String{Value: leftVal + rightVal}
 }

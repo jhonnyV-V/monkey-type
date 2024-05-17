@@ -13,7 +13,8 @@ const (
 	// Identifiers
 	IDENT = "IDENT"
 	// literals
-	INT = "INT"
+	INT    = "INT"
+	STRING = "STRING"
 	// Operators
 	PLUS     = "+"
 	MINUS    = "-"
