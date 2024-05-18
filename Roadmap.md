@@ -1,0 +1,26 @@
+## to add
+- [ ] typeOf
+- [ ] forEach
+- [ ] map
+- [ ] pop
+- [ ] reverse
+- [ ] sort
+- [ ] reduce
+- [ ] filter
+- [ ] find
+- [ ] findIndex
+- [ ] append
+- [ ] copy
+- [ ] delete
+- [ ] join
+- [ ] len
+- [ ] lower
+- [ ] replace
+- [ ] split
+- [ ] toLower
+- [ ] toUpper
+- [ ] trim
+- [ ] trimLeft
+- [ ] trimRight
+- [ ] lastIndex
+- [ ] contains and if is a string compare the runes
