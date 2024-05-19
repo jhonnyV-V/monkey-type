@@ -13,8 +13,6 @@
 - [ ] copy
 - [ ] delete
 - [ ] join
-- [ ] len
-- [ ] lower
 - [ ] replace
 - [ ] split
 - [ ] toLower
@@ -24,3 +22,9 @@
 - [ ] trimRight
 - [ ] lastIndex
 - [ ] contains and if is a string compare the runes
+- [ ] set and delete for hashmap
+
+## maybe
+- [ ] read code from file and execute?
+- [ ] http client?
+- [ ] file system access?
