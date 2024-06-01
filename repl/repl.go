@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"mokey-type/evaluator"
+	"mokey-type/compiler"
 	"mokey-type/lexer"
-	"mokey-type/object"
 	"mokey-type/parser"
+	"mokey-type/vm"
 )
 
 const PROMPT = ">> "
@@ -23,7 +23,6 @@ const MONKEY_FACE = `
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnviroment()
 	for {
 		fmt.Print(PROMPT)
 		scanned := scanner.Scan()
@@ -41,11 +40,22 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program, env)
-		if evaluated != nil {
-			io.WriteString(out, evaluated.Inspect())
-			io.WriteString(out, "\n")
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			fmt.Fprintf(out, "!Woops compiling bytecode failed\n error:\n \t%s\n", err)
+			continue
 		}
+
+		machine := vm.New(comp.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "!Woops executing bytecode failed\n error:\n \t%s\n", err)
+			continue
+		}
+		stackTop := machine.LastPopedStackElement()
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
 	}
 }
 
