@@ -135,14 +135,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if c.lastInstructionIsPop() {
 			c.removeLastPop()
 		}
-		var jumpPos int
-		if node.Alternative != nil {
-			jumpPos = c.emit(code.OpJump, 999)
-		}
+
+		jumpPos := c.emit(code.OpJump, 999)
+
 		posAfterConsequence := len(c.instructions)
 		c.changeOperand(jumpNotTruthyPos, posAfterConsequence)
 
-		if node.Alternative != nil {
+		if node.Alternative == nil {
+			c.emit(code.OpNull)
+		} else {
 			err = c.Compile(node.Alternative)
 			if err != nil {
 				return err
@@ -151,9 +152,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if c.lastInstructionIsPop() {
 				c.removeLastPop()
 			}
-			posAfterAlternative := len(c.instructions)
-			c.changeOperand(jumpPos, posAfterAlternative)
 		}
+		posAfterAlternative := len(c.instructions)
+		c.changeOperand(jumpPos, posAfterAlternative)
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
