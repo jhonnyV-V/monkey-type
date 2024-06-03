@@ -6,6 +6,7 @@ import (
 	"io"
 	"mokey-type/compiler"
 	"mokey-type/lexer"
+	"mokey-type/object"
 	"mokey-type/parser"
 	"mokey-type/vm"
 )
@@ -23,6 +24,10 @@ const MONKEY_FACE = `
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	for {
 		fmt.Print(PROMPT)
 		scanned := scanner.Scan()
@@ -40,14 +45,14 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		comp := compiler.New()
+		comp := compiler.NewWithState(symbolTable, constants)
 		err := comp.Compile(program)
 		if err != nil {
 			fmt.Fprintf(out, "!Woops compiling bytecode failed\n error:\n \t%s\n", err)
 			continue
 		}
 
-		machine := vm.New(comp.Bytecode())
+		machine := vm.NewWithGlobalsStore(comp.Bytecode(), globals)
 		err = machine.Run()
 		if err != nil {
 			fmt.Fprintf(out, "!Woops executing bytecode failed\n error:\n \t%s\n", err)
