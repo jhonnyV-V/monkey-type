@@ -272,12 +272,12 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block.Statements = []ast.Statement{}
 	p.NextToken()
 
-	if !p.currentTokenIs(token.RBRACE) && !p.currentTokenIs(token.EOF) {
-		if p.currentTokenIs(token.LBRACE) {
-			p.NextToken()
-		}
+	for !p.currentTokenIs(token.RBRACE) && !p.currentTokenIs(token.EOF) {
+
 		statement := p.ParseStatement()
-		block.Statements = append(block.Statements, statement)
+		if statement != nil {
+			block.Statements = append(block.Statements, statement)
+		}
 		p.NextToken()
 	}
 
@@ -292,6 +292,10 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	p.NextToken()
 	expresssion.Condition = p.parseExpression(LOWEST)
 	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
 		return nil
 	}
 
@@ -355,7 +359,7 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	}
 	p.NextToken()
 	list = append(list, p.parseExpression(LOWEST))
-	for p.peekTokenIs(token.COMMA) && !p.peekTokenIs(token.EOF) {
+	for p.peekTokenIs(token.COMMA) {
 		p.NextToken()
 		p.NextToken()
 		list = append(list, p.parseExpression(LOWEST))
