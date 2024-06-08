@@ -1,5 +1,7 @@
 package object
 
+import "fmt"
+
 var First = &Builtin{
 	Fn: func(args ...Object) Object {
 		if len(args) != 1 {
@@ -58,17 +60,15 @@ var Push = &Builtin{
 			return NewError("wrong number of arguments. got=%d, want=2", len(args))
 		}
 		if args[0].Type() != ARRAY_OBJ {
+			fmt.Printf("PUSH error %#+v\n", args)
 			return NewError("argument to `push` must be ARRAY, got %s", args[0].Type())
 		}
 		arr := args[0].(*Array)
 		length := len(arr.Elements)
-		if length > 0 {
-			newElements := make([]Object, length)
-			copy(newElements, arr.Elements)
-			newElements[length] = args[1]
-			return &Array{Elements: newElements}
-		}
-		return nil
+		newElements := make([]Object, length+1)
+		copy(newElements, arr.Elements)
+		newElements[length] = args[1]
+		return &Array{Elements: newElements}
 	},
 }
 
