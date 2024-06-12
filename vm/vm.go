@@ -281,6 +281,14 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpCurrentClosure:
+			currentCl := vm.currentFrame().cl
+
+			err := vm.push(currentCl)
+			if err != nil {
+				return err
+			}
 		}
 
 	}
