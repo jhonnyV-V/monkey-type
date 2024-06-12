@@ -81,19 +81,11 @@ func (vm *VM) Run() error {
 		ins = vm.currentFrame().Instructions()
 		//TODO: check how I messed up this indexing
 		op = code.Opcode(ins[ip-1])
-		fmt.Println("instructions")
-		fmt.Println(ins)
-		fmt.Printf("ip %d\n", ip)
-		fmt.Printf("opcode %d\n", op)
-		fmt.Println("ins as bytes")
-		fmt.Println([]byte(ins))
 
 		switch op {
 		case code.OpConstant:
 			constIndex := code.ReadUint16(ins[ip:])
 			vm.currentFrame().ip += 2
-			fmt.Printf("condition %+v\n", vm.currentFrame().ip < len(vm.currentFrame().Instructions()))
-			fmt.Printf("constants %#+v\n", vm.constant[0])
 			err := vm.push(vm.constant[constIndex])
 			if err != nil {
 				return err
@@ -257,7 +249,6 @@ func (vm *VM) Run() error {
 			definition := object.Builtins[localIndex]
 			err := vm.push(definition.Builtin)
 
-			fmt.Printf("function name: %s\n", definition.Name)
 			if err != nil {
 				return err
 			}
@@ -299,20 +290,13 @@ func (vm *VM) push(ob object.Object) error {
 	if vm.sp >= StackSize {
 		return fmt.Errorf("Stack Overflow")
 	}
-	fmt.Println("pushing")
-	fmt.Println(vm.sp)
-	fmt.Println(ob)
-	_, ok := ob.(*object.Integer)
-	fmt.Printf("is object.Integer, %+v", ok)
 	vm.stack[vm.sp] = ob
 	vm.sp++
-	fmt.Printf("incrementing sp %d\n", vm.sp)
 
 	return nil
 }
 
 func (vm *VM) pop() object.Object {
-	fmt.Printf("sp in pop %d\n", vm.sp)
 	ob := vm.stack[vm.sp-1]
 	vm.sp--
 
@@ -573,7 +557,6 @@ func (vm *VM) executeCall(numArg int) error {
 
 func (vm *VM) callBuiltin(fn *object.Builtin, numArg int) error {
 	args := vm.stack[vm.sp-numArg : vm.sp]
-	fmt.Printf("args: %#+v\n", args)
 	result := fn.Fn(args...)
 	if result != nil {
 		return vm.push(result)
