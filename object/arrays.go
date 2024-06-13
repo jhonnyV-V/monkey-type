@@ -1,7 +1,5 @@
 package object
 
-import "fmt"
-
 var First = &Builtin{
 	Fn: func(args ...Object) Object {
 		if len(args) != 1 {
@@ -60,7 +58,6 @@ var Push = &Builtin{
 			return NewError("wrong number of arguments. got=%d, want=2", len(args))
 		}
 		if args[0].Type() != ARRAY_OBJ {
-			fmt.Printf("PUSH error %#+v\n", args)
 			return NewError("argument to `push` must be ARRAY, got %s", args[0].Type())
 		}
 		arr := args[0].(*Array)
@@ -88,5 +85,67 @@ var Pop = &Builtin{
 			return &Array{Elements: newElements}
 		}
 		return arr
+	},
+}
+
+var Merge = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		if args[0].Type() != ARRAY_OBJ || args[1].Type() != ARRAY_OBJ {
+			return NewError("argument to `push` must be ARRAY, got %s, %s", args[0].Type(), args[1].Type())
+		}
+
+		arrA := args[0].(*Array)
+		arrB := args[1].(*Array)
+		newElements := append(arrA.Elements, arrB.Elements...)
+		return &Array{Elements: newElements}
+	},
+}
+
+var FindIndex = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		switch arg := args[0].(type) {
+		case *Array:
+			var result Integer
+
+			for i, element := range arg.Elements {
+				if element.Type() == args[1].Type() {
+
+					switch element := element.(type) {
+					case *Boolean:
+						value := args[1].(*Boolean).Value
+						if element.Value == value {
+							result.Value = int64(i)
+						}
+
+					case *Integer:
+						value := args[1].(*Integer).Value
+						if element.Value == value {
+							result.Value = int64(i)
+						}
+
+					case *String:
+						value := args[1].(*String).Value
+						if element.Value == value {
+							result.Value = int64(i)
+						}
+
+					case *NullValue:
+						result.Value = int64(i)
+
+					default:
+						return NewError("argument to `contains` not supported, got %s", args[1].Type())
+					}
+				}
+			}
+			return &result
+		default:
+			return NewError("argument to `findIndex` not supported, got %s", args[0].Type())
+		}
 	},
 }

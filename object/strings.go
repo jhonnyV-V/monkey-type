@@ -46,3 +46,77 @@ var Replace = &Builtin{
 		}
 	},
 }
+
+var ToLower = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 1 {
+			return NewError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != STRING_OBJ {
+			return NewError("argument to `toLower` must be STRING, got %s", args[0].Type())
+		}
+
+		return &String{Value: strings.ToLower(args[0].(*String).Value)}
+	},
+}
+
+var ToUpper = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 1 {
+			return NewError("wrong number of arguments. got=%d, want=1", len(args))
+		}
+		if args[0].Type() != STRING_OBJ {
+			return NewError("argument to `toUpper` must be STRING, got %s", args[0].Type())
+		}
+
+		return &String{Value: strings.ToUpper(args[0].(*String).Value)}
+	},
+}
+
+var Trim = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		if args[0].Type() != STRING_OBJ && args[1].Type() != STRING_OBJ {
+			return NewError("argument to `trim` must be STRING, got %s %s", args[0].Type(), args[1].Type())
+		}
+
+		value := args[0].(*String).Value
+		cutset := args[1].(*String).Value
+
+		return &String{Value: strings.Trim(value, cutset)}
+	},
+}
+
+var TrimLeft = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		if args[0].Type() != STRING_OBJ && args[1].Type() != STRING_OBJ {
+			return NewError("argument to `trimLeft` must be STRING, got %s %s", args[0].Type(), args[1].Type())
+		}
+
+		value := args[0].(*String).Value
+		cutset := args[1].(*String).Value
+
+		return &String{Value: strings.TrimLeft(value, cutset)}
+	},
+}
+
+var TrimRight = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		if args[0].Type() != STRING_OBJ && args[1].Type() != STRING_OBJ {
+			return NewError("argument to `trimRight` must be STRING, got %s %s", args[0].Type(), args[1].Type())
+		}
+
+		value := args[0].(*String).Value
+		cutset := args[1].(*String).Value
+
+		return &String{Value: strings.TrimRight(value, cutset)}
+	},
+}

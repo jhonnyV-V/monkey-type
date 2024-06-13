@@ -82,3 +82,49 @@ var Join = &Builtin{
 		}
 	},
 }
+
+var Contains = &Builtin{
+	Fn: func(args ...Object) Object {
+		if len(args) != 2 {
+			return NewError("wrong number of arguments. got=%d, want=2", len(args))
+		}
+		switch arg := args[0].(type) {
+		case *String:
+			value, ok := args[1].(*String)
+			if !ok {
+				return NewError("argument to `contains` not supported, expect=%s and got=%s", args[0].Type(), args[1].Type())
+			}
+			return &Boolean{Value: strings.Contains(arg.Value, value.Value)}
+		case *Array:
+			var result Boolean
+
+			for _, element := range arg.Elements {
+				if element.Type() == args[1].Type() {
+
+					switch element := element.(type) {
+					case *Boolean:
+						value := args[1].(*Boolean).Value
+						result.Value = element.Value == value
+
+					case *Integer:
+						value := args[1].(*Integer).Value
+						result.Value = element.Value == value
+
+					case *String:
+						value := args[1].(*String).Value
+						result.Value = element.Value == value
+
+					case *NullValue:
+						result.Value = true
+
+					default:
+						return NewError("argument to `contains` not supported, got %s", args[1].Type())
+					}
+				}
+			}
+			return &result
+		default:
+			return NewError("argument to `contains` not supported, got %s", args[0].Type())
+		}
+	},
+}

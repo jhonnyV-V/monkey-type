@@ -558,8 +558,20 @@ func (vm *VM) executeCall(numArg int) error {
 func (vm *VM) callBuiltin(fn *object.Builtin, numArg int) error {
 	args := vm.stack[vm.sp-numArg : vm.sp]
 	result := fn.Fn(args...)
+
 	if result != nil {
-		return vm.push(result)
+		switch result := result.(type) {
+
+		case *object.Boolean:
+			if result.Value {
+				return vm.push(True)
+			}
+			return vm.push(False)
+
+		default:
+			return vm.push(result)
+
+		}
 	} else {
 		return vm.push(Null)
 	}

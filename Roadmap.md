@@ -5,22 +5,21 @@
 - [x] join
 - [x] split
 - [x] replace
-- [ ] toLower
-- [ ] toUpper
-- [ ] trim
-- [ ] trimLeft
-- [ ] trimRight
-- [ ] contains and if is a string compare the runes
-- [ ] merge
-- [ ] set and delete for hashmap
-- [ ] map
-- [ ] forEach
-- [ ] sort
-- [ ] reduce
-- [ ] filter
-- [ ] find
-- [ ] findIndex
+- [x] toLower
+- [x] toUpper
+- [x] trim
+- [x] trimLeft
+- [x] trimRight
+- [x] contains and if is a string compare the runes
+- [x] merge
+- [x] findIndex
 - [ ] lastIndex
+- [ ] set and remove for hashmap
+- [ ] map ?
+- [ ] forEach ?
+- [ ] sort ?
+- [ ] reduce ?
+- [ ] filter ?
 
 ## maybe
 - [ ] read code from file and execute?

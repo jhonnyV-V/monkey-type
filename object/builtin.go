@@ -70,6 +70,38 @@ var Builtins = []struct {
 		"replace",
 		Replace,
 	},
+	{
+		"toLower",
+		ToLower,
+	},
+	{
+		"toUpper",
+		ToUpper,
+	},
+	{
+		"trim",
+		Trim,
+	},
+	{
+		"trimLeft",
+		TrimLeft,
+	},
+	{
+		"trimRight",
+		TrimRight,
+	},
+	{
+		"contains",
+		Contains,
+	},
+	{
+		"merge",
+		Merge,
+	},
+	{
+		"findIndex",
+		FindIndex,
+	},
 }
 
 func NewError(format string, a ...interface{}) *Error {
