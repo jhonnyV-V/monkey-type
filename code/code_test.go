@@ -34,19 +34,21 @@ func TestInstuctionString(t *testing.T) {
 		Make(OpConstant, 65535),
 		Make(OpGetLocal, 255),
 		Make(OpClosure, 65535, 255),
+		Make(OpLoadInt, 65540),
 	}
 	expected := `0000 OpAdd
 0001 OpConstant 2
 0004 OpConstant 65535
 0007 OpGetLocal 255
 0009 OpClosure 65535 255
+0013 OpLoadInt 65540
 `
 	concatted := Instructions{}
 	for _, ins := range instructions {
 		concatted = append(concatted, ins...)
 	}
 	if concatted.String() != expected {
-		t.Errorf("instructions wrongly formatted.\nwant=%q\ngot=%q",
+		t.Errorf("instructions wrongly formatted.\nwant=%q\n got=%q",
 			expected, concatted.String())
 	}
 }

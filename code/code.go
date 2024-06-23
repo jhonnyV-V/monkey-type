@@ -42,6 +42,7 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
+	OpLoadInt
 )
 
 var definitions = map[Opcode]*Definition{
@@ -75,6 +76,7 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
+	OpLoadInt:        {"OpLoadInt", []int{4}},
 }
 
 func Lookup(op byte) (*Definition, error) {
@@ -142,10 +144,14 @@ func Make(op Opcode, operands ...int) []byte {
 
 	for i, o := range operands {
 		width := def.OperandWidths[i]
+		if op == OpLoadInt {
+			fmt.Printf("width of operand is %d\n", width)
+		}
 		switch width {
+		case 4:
+			binary.BigEndian.PutUint32(instruction[offset:], uint32(o))
 		case 2:
 			binary.BigEndian.PutUint16(instruction[offset:], uint16(o))
-
 		case 1:
 			instruction[offset] = byte(o)
 		}
@@ -159,6 +165,8 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 	offset := 0
 	for i, width := range def.OperandWidths {
 		switch width {
+		case 4:
+			operands[i] = int(ReadUint32(ins[offset:]))
 		case 2:
 			operands[i] = int(ReadUint16(ins[offset:]))
 
@@ -170,10 +178,12 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 	return operands, offset
 }
 
+func ReadUint8(ins Instructions) uint8 {
+	return uint8(ins[0])
+}
 func ReadUint16(ins Instructions) uint16 {
 	return binary.BigEndian.Uint16(ins)
 }
-
-func ReadUint8(ins Instructions) uint8 {
-	return uint8(ins[0])
+func ReadUint32(ins Instructions) uint32 {
+	return binary.BigEndian.Uint32(ins)
 }
