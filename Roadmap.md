@@ -15,7 +15,7 @@
 - [x] findIndex
 - [ ] lastIndex
 - [ ] set and remove for hashmap
-- [ ] for loop
+- [x] for loop
 - [ ] while loop
 
 ## maybe
