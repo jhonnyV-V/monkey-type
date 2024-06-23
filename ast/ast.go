@@ -321,3 +321,27 @@ func (hl *HashLiteral) String() string {
 	out.WriteString("}")
 	return out.String()
 }
+
+type ForLoop struct {
+	Token       token.Token
+	Declaration LetStatement
+	Condition   Expression
+	Consequence Expression
+	Body        *BlockStatement
+}
+
+func (fr *ForLoop) expressionNode()      {}
+func (fr *ForLoop) TokenLiteral() string { return fr.Token.Literal }
+func (fr *ForLoop) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for")
+	out.WriteString("(")
+	out.WriteString(fr.Declaration.String())
+	out.WriteString(fr.Condition.String())
+	out.WriteString(";")
+	out.WriteString(fr.Consequence.String())
+	out.WriteString(")")
+	out.WriteString(fr.Body.String())
+	return out.String()
+}

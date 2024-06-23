@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mokey-type/ast"
 	"mokey-type/lexer"
+	"strconv"
 	"testing"
 )
 
@@ -766,5 +767,44 @@ func TestFunctionLiteralWithName(t *testing.T) {
 	}
 	if function.Name != "myFunction" {
 		t.Fatalf("function literal name wrong. want 'myFunction', got=%q\n", function.Name)
+	}
+}
+
+// TODO: Write an actuall good test
+func TestForLoop(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{input: "for(let i = 0; i < b; ++i) {i}", expectedParams: []string{"i", "0", "i", "<", "b", "++", "i"}},
+	}
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		loop := stmt.Expression.(*ast.ForLoop)
+		if loop == nil {
+			t.Errorf("expected for loop got nil\n")
+		}
+		if !testLetStatement(t, &loop.Declaration, tt.expectedParams[0]) {
+			return
+		}
+		expectedValue, _ := strconv.ParseInt(tt.expectedParams[1], 10, 64)
+		testLiteralExpression(t, loop.Declaration.Value, expectedValue)
+		if !testInfixExpression(t, loop.Condition, tt.expectedParams[2], tt.expectedParams[3], tt.expectedParams[4]) {
+			return
+		}
+		exp, ok := loop.Consequence.(*ast.PrefixExpression)
+		fmt.Printf("condition: %#+v\n\n", loop)
+		fmt.Printf("condition: %#+v\n\n", loop.Condition)
+		if !ok {
+			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Expression)
+		}
+
+		if exp.Operator != tt.expectedParams[5] {
+			t.Fatalf("exp.Operator is not '%s'. got=%s", tt.expectedParams[5], exp.Operator)
+		}
 	}
 }

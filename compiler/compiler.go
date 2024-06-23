@@ -149,12 +149,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		case "-":
 			c.emit(code.OpMinus)
+
 		case "++":
 			c.emit(code.OpLoadInt, 1)
 			c.emit(code.OpAdd)
+
 		case "--":
 			c.emit(code.OpLoadInt, 1)
 			c.emit(code.OpSub)
+
 		default:
 			return fmt.Errorf("unknown operato %s", node.Operator)
 		}
@@ -330,6 +333,49 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 		c.emit(code.OpCall, len(node.Arguments))
 
+	case *ast.ForLoop:
+
+		err := c.Compile(&node.Declaration)
+		if err != nil {
+			return err
+		}
+
+		indexSymbol, _ := c.symbolTable.Resolve(node.Declaration.Name.Value)
+
+		conditionPos := len(c.currentInstructions())
+
+		err = c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		//Bogus value for jump
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 999)
+
+		err = c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.OpPop) {
+			c.removeLastPop()
+		}
+
+		err = c.Compile(node.Consequence)
+		if err != nil {
+			return err
+		}
+
+		if indexSymbol.Scope == GlobalScope {
+			c.emit(code.OpSetGlobal, indexSymbol.Index)
+		} else {
+			c.emit(code.OpSetLocal, indexSymbol.Index)
+		}
+
+		c.emit(code.OpJump, conditionPos)
+
+		posAfterConsequence := len(c.currentInstructions())
+		c.changeOperand(jumpNotTruthyPos, posAfterConsequence)
 	}
 	return nil
 }

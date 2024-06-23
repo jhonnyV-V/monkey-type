@@ -191,6 +191,26 @@ func TestIntegerArithmetic(t *testing.T) {
 				code.Make(code.OpPop),
 			},
 		},
+		{
+			input:             "++1",
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpLoadInt, 1),
+				code.Make(code.OpAdd),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             "--1",
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpLoadInt, 1),
+				code.Make(code.OpSub),
+				code.Make(code.OpPop),
+			},
+		},
 	}
 	runCompilerTests(t, test)
 }
@@ -1019,6 +1039,50 @@ func TestRecursiveFunctions(t *testing.T) {
 				code.Make(code.OpSetGlobal, 0),
 				code.Make(code.OpGetGlobal, 0),
 				code.Make(code.OpCall, 0),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+	runCompilerTests(t, tests)
+}
+
+func TestForLoop(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			for(let i = 0; i < 5; ++i){i}; 3333;
+			`,
+			expectedConstants: []interface{}{0, 5, 3333},
+			expectedInstructions: []code.Instructions{
+				// 0000
+				code.Make(code.OpConstant, 0),
+				// 0003
+				code.Make(code.OpSetGlobal, 0),
+				// 0006
+				code.Make(code.OpConstant, 1),
+				// 0009
+				code.Make(code.OpGetGlobal, 0),
+				// 0012
+				code.Make(code.OpGreaterThan),
+				// 0013
+				code.Make(code.OpJumpNotTruthy, 34),
+				// 0016
+				code.Make(code.OpGetGlobal, 0),
+				// 0019
+				code.Make(code.OpGetGlobal, 0),
+				// 0022
+				code.Make(code.OpLoadInt, 1),
+				// 0027
+				code.Make(code.OpAdd),
+				// 0028
+				code.Make(code.OpSetGlobal, 0),
+				// 0031
+				code.Make(code.OpJump, 6),
+				// 0034
+				code.Make(code.OpPop),
+				// 0035
+				code.Make(code.OpConstant, 2),
+				// 0038
 				code.Make(code.OpPop),
 			},
 		},

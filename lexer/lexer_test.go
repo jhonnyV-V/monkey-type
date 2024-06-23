@@ -30,6 +30,8 @@ func TestNewToken(t *testing.T) {
 	{"foo": "bar"}
 	--a
 	++a
+	for(let i = 0; i < 10; ++i){}
+	`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -124,6 +126,22 @@ func TestNewToken(t *testing.T) {
 		{token.IDENT, "a"},
 		{token.INCREMENT, "++"},
 		{token.IDENT, "a"},
+		{token.FOR, "for"},
+		{token.LPAREN, "("},
+		{token.LET, "let"},
+		{token.IDENT, "i"},
+		{token.ASSIGN, "="},
+		{token.INT, "0"},
+		{token.SEMICOLON, ";"},
+		{token.IDENT, "i"},
+		{token.LT, "<"},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+		{token.INCREMENT, "++"},
+		{token.IDENT, "i"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
 

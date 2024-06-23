@@ -144,9 +144,6 @@ func Make(op Opcode, operands ...int) []byte {
 
 	for i, o := range operands {
 		width := def.OperandWidths[i]
-		if op == OpLoadInt {
-			fmt.Printf("width of operand is %d\n", width)
-		}
 		switch width {
 		case 4:
 			binary.BigEndian.PutUint32(instruction[offset:], uint32(o))
