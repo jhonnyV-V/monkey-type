@@ -27,7 +27,9 @@ func TestNewToken(t *testing.T) {
 	"foobar"
 	"foo bar"
 	[1,2]
-	{"foo": "bar"}`
+	{"foo": "bar"}
+	--a
+	++a
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -118,6 +120,10 @@ func TestNewToken(t *testing.T) {
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.DECREMENT, "--"},
+		{token.IDENT, "a"},
+		{token.INCREMENT, "++"},
+		{token.IDENT, "a"},
 		{token.EOF, ""},
 	}
 

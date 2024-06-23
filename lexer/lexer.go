@@ -50,9 +50,21 @@ func (l *Lexer) NextToken() token.Token {
 	case ',':
 		tok = token.NewToken(token.COMMA, l.ch)
 	case '+':
-		tok = token.NewToken(token.PLUS, l.ch)
+		if l.peekChar() == '+' {
+			ch := l.ch
+			l.ReadChar()
+			tok = token.Token{Type: token.INCREMENT, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = token.NewToken(token.PLUS, l.ch)
+		}
 	case '-':
-		tok = token.NewToken(token.MINUS, l.ch)
+		if l.peekChar() == '-' {
+			ch := l.ch
+			l.ReadChar()
+			tok = token.Token{Type: token.DECREMENT, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = token.NewToken(token.MINUS, l.ch)
+		}
 	case '{':
 		tok = token.NewToken(token.LBRACE, l.ch)
 	case '}':

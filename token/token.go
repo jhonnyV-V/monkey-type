@@ -25,15 +25,17 @@ const (
 	LT       = "<"
 	GT       = ">"
 
-	EQ     = "=="
-	NOT_EQ = "!="
-	GT_EQ  = ">="
-	LT_EQ  = "<="
+	EQ        = "=="
+	NOT_EQ    = "!="
+	GT_EQ     = ">="
+	LT_EQ     = "<="
+	INCREMENT = "++"
+	DECREMENT = "--"
 
 	// Delimiters
 	SEMICOLON = ";"
 	COMMA     = ","
-	COLON = ":"
+	COLON     = ":"
 
 	LPAREN   = "("
 	RPAREN   = ")"
