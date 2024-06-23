@@ -194,6 +194,8 @@ func TestIntegerArithmetic(t *testing.T) {
 		{"-10", -10},
 		{"-50 + 100 + -50", 0},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
+		{"++1", 2},
+		{"--2", 1},
 	}
 	runVmTests(t, tests)
 }

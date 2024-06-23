@@ -279,6 +279,14 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpLoadInt:
+			num := int(code.ReadUint32(ins[ip:]))
+			vm.currentFrame().ip += 4
+			err := vm.push(&object.Integer{Value: int64(num)})
+			if err != nil {
+				return err
+			}
 		}
 
 	}
