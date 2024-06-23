@@ -79,7 +79,6 @@ func (vm *VM) Run() error {
 		vm.currentFrame().ip++
 		ip = vm.currentFrame().ip
 		ins = vm.currentFrame().Instructions()
-		//TODO: check how I messed up this indexing
 		op = code.Opcode(ins[ip-1])
 
 		switch op {

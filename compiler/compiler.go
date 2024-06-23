@@ -149,6 +149,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		case "-":
 			c.emit(code.OpMinus)
+		case "++":
+			c.emit(code.OpLoadInt, 1)
+			c.emit(code.OpAdd)
+		case "--":
+			c.emit(code.OpLoadInt, 1)
+			c.emit(code.OpSub)
 		default:
 			return fmt.Errorf("unknown operato %s", node.Operator)
 		}
