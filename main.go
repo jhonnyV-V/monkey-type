@@ -13,5 +13,5 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("Hello %s!, This Is MonkeyType\n", user.Username)
-	repl.Start(os.Stdin, os.Stdout)
+	repl.Start(os.Stdout)
 }

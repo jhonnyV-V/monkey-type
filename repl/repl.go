@@ -1,18 +1,30 @@
 package repl
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"io"
+	"os"
+	"strings"
+
 	"mokey-type/compiler"
 	"mokey-type/lexer"
 	"mokey-type/object"
 	"mokey-type/parser"
 	"mokey-type/vm"
+
+	"github.com/chzyer/readline"
 )
 
-const PROMPT = ">> "
-const MONKEY_FACE = `
+const (
+	GREEN  = "\033[32m"
+	BLUE   = "\033[36m"
+	YELLOW = "\033[33m"
+	RESET  = "\033[0m"
+	PROMPT = GREEN + ">> " + RESET
+)
+
+const MONKEY_FACE = YELLOW + `
      w  c(..)o   (
       \__(-)    __)
           /\   (
@@ -20,10 +32,12 @@ const MONKEY_FACE = `
          w /|
           | \
           m  m
-`
+` + RESET
 
-func Start(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
+func Start(out io.Writer) {
+	vim := flag.Bool("vim", false, "activates vim mode")
+	flag.Parse()
+
 	constants := []object.Object{}
 	globals := make([]object.Object, vm.GlobalsSize)
 	symbolTable := compiler.NewSymbolTable()
@@ -32,24 +46,35 @@ func Start(in io.Reader, out io.Writer) {
 	}
 
 	for {
-		fmt.Print(PROMPT)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+
+		rl, err := readline.New(PROMPT)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 
-		line := scanner.Text()
+		rl.SetVimMode(*vim)
+
+		input, err := rl.Readline()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		line := strings.TrimSuffix(input, "\n")
+		if line == "exit" {
+			os.Exit(0)
+		}
+
 		l := lexer.New(line)
 		p := parser.New(l)
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
+			printParserErrors(p.Errors())
 			continue
 		}
 
 		comp := compiler.NewWithState(symbolTable, constants)
-		err := comp.Compile(program)
+		err = comp.Compile(program)
 		if err != nil {
 			fmt.Fprintf(out, "!Woops compiling bytecode failed\n error:\n \t%s\n", err)
 			continue
@@ -58,20 +83,19 @@ func Start(in io.Reader, out io.Writer) {
 		machine := vm.NewWithGlobalsStore(comp.Bytecode(), globals)
 		err = machine.Run()
 		if err != nil {
-			fmt.Fprintf(out, "!Woops executing bytecode failed\n error:\n \t%s\n", err)
+			fmt.Fprintf(os.Stderr, "!Woops executing bytecode failed\n error:\n \t%s\n", err)
 			continue
 		}
 		stackTop := machine.LastPopedStackElement()
-		io.WriteString(out, stackTop.Inspect())
-		io.WriteString(out, "\n")
+		fmt.Fprintln(os.Stderr, stackTop.Inspect())
 	}
 }
 
-func printParserErrors(out io.Writer, errors []string) {
-	io.WriteString(out, MONKEY_FACE)
-	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
-	io.WriteString(out, " parser errors:\n")
+func printParserErrors(errors []string) {
+	io.WriteString(os.Stderr, MONKEY_FACE)
+	io.WriteString(os.Stderr, "Woops! We ran into some monkey business here!\n")
+	io.WriteString(os.Stderr, " parser errors:\n")
 	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
+		io.WriteString(os.Stderr, "\t"+msg+"\n")
 	}
 }
